@@ -16,8 +16,8 @@ let gridHeight = screen.height/50
 let gridArea = gridHeight*gridWidth
 let fadeDistanceX = screen.availWidth/90
 let fadeDistanceY = screen.availHeight/90
-console.log(screen.width/80)
-
+let rightEdge
+let leftEdge
 
 
 
@@ -93,7 +93,7 @@ const onMouseMove = (e) =>{
     }
 
 
-
+    
     oldx = e.pageX;
     oldy = e.pageY;
 
@@ -103,10 +103,16 @@ const onMouseMove = (e) =>{
     // console.log(storedDots[0].mesh.position.x)
     // console.log(Math.abs(Math.trunc(storedDots[0].mesh.position.x)) % moudulusCounter)
     // console.log(moudulusCounter)
-    console.log(Math.abs(Math.trunc(storedDots[storedDots.length-1].mesh.position.x))  % leftModulusCounter)
+    console.log(storedDots[storedDots.length-1])
+    // storedDots[storedDots.length-1].mesh.material.color.setHex(lime)
+    storedDots[0].mesh.material.color.setHex(lime)
+    storedDots[storedDots.map(function(e) { return e.row; }).indexOf(Math.max(...storedDots.map(o => o.row), 0))].mesh.material.color.setHex(lime)
+    cameraO.updateProjectionMatrix()
+    
+    console.log(Math.abs(Math.trunc(storedDots[storedDots.length-1].mesh.position.x)))
     if (Math.abs(Math.trunc(storedDots[0].mesh.position.x)) % moudulusCounter == 0) {
       renderByRowColumn()
-    } else if (Math.abs(Math.trunc(storedDots[storedDots.length-1].mesh.position.x)) % leftModulusCounter == 0) {
+    } else if (Math.trunc(storedDots[storedDots.map(function(e) { return e.row; }).indexOf(Math.max(...storedDots.map(o => o.row), 0))].mesh.position.x) % leftModulusCounter == 0) {
       renderByRowColumn()
     }
 
@@ -192,113 +198,113 @@ let farRight
 
 
 
-const renderVisibleDots = () => {
-  if (storedDots[0] == undefined) {
-    for (let w = 0; w < gridWidth; w++) {
-      for (let h = 0; h < gridHeight; h++) {
+// const renderVisibleDots = () => {
+//   if (storedDots[0] == undefined) {
+//     for (let w = 0; w < gridWidth; w++) {
+//       for (let h = 0; h < gridHeight; h++) {
         
       
-        let newMesh = new THREE.PlaneGeometry( 0.9, 0.9 )
-        let newMaterial = new THREE.MeshBasicMaterial( {color: white, side: THREE.DoubleSide} )
-        const plane = new THREE.Mesh(newMesh, newMaterial);
-        plane.position.x = w - gridWidth/2
-        plane.position.y = h - gridHeight/2
-        plane.renderOrder = 1
-        scene.add(plane)
+//         let newMesh = new THREE.PlaneGeometry( 0.9, 0.9 )
+//         let newMaterial = new THREE.MeshBasicMaterial( {color: white, side: THREE.DoubleSide} )
+//         const plane = new THREE.Mesh(newMesh, newMaterial);
+//         plane.position.x = w - gridWidth/2
+//         plane.position.y = h - gridHeight/2
+//         plane.renderOrder = 1
+//         scene.add(plane)
 
 
-        let newOutline = new THREE.PlaneGeometry( 1, 1 )
-        let newOutlineMaterial = new THREE.MeshBasicMaterial( {color: black, side: THREE.DoubleSide} )
-        const planeOutline = new THREE.Mesh(newOutline, newOutlineMaterial);
-        planeOutline.position.x = w - gridWidth/2
-        planeOutline.position.y = h - gridHeight/2
-        planeOutline.position.z -= 5
-        planeOutline.renderOrder = 1
-        scene.add(planeOutline)
+//         let newOutline = new THREE.PlaneGeometry( 1, 1 )
+//         let newOutlineMaterial = new THREE.MeshBasicMaterial( {color: black, side: THREE.DoubleSide} )
+//         const planeOutline = new THREE.Mesh(newOutline, newOutlineMaterial);
+//         planeOutline.position.x = w - gridWidth/2
+//         planeOutline.position.y = h - gridHeight/2
+//         planeOutline.position.z -= 5
+//         planeOutline.renderOrder = 1
+//         scene.add(planeOutline)
 
         
-        let newDot = new DOT(w, h, false, plane, planeOutline)
-        newDot.x = w
-        newDot.y = h
-        storedDots.push(newDot)
-        // console.log(newDot)
+//         let newDot = new DOT(w, h, false, plane, planeOutline)
+//         newDot.x = w
+//         newDot.y = h
+//         storedDots.push(newDot)
+//         // console.log(newDot)
     
 
         
-      }
-    }
-  } else {
-    // console.log((storedDots[0].mesh.position.x - cameraO.position.x))
-    let newDotArray = storedDots
-    let toBeSpliced = []
-    if (establishedRightSide != true) {
-      farRight = Math.max(...storedDots.map(o => o.row), 0);
-      establishedRightSide = true
-    }
-    for (let i = 0; i < storedDots.length; i++) {
-      // console.log(storedDots[0].mesh.position.x - cameraO.position.x)
+//       }
+//     }
+//   } else {
+//     // console.log((storedDots[0].mesh.position.x - cameraO.position.x))
+//     let newDotArray = storedDots
+//     let toBeSpliced = []
+//     if (establishedRightSide != true) {
+//       farRight = Math.max(...storedDots.map(o => o.row), 0);
+//       establishedRightSide = true
+//     }
+//     for (let i = 0; i < storedDots.length; i++) {
+//       // console.log(storedDots[0].mesh.position.x - cameraO.position.x)
 
-      if (Math.round(storedDots[i].mesh.position.x - cameraO.position.x) % (fadeDistanceX - distanceCounter)) {}
+//       if (Math.round(storedDots[i].mesh.position.x - cameraO.position.x) % (fadeDistanceX - distanceCounter)) {}
 
-      if (Math.abs(storedDots[i].mesh.position.x - cameraO.position.x) > fadeDistanceX || Math.abs(storedDots[i].mesh.position.y - cameraO.position.x) > fadeDistanceY) {
-        if (storedDots[i].mesh.position.x - cameraO.position.x < 0) {//a box scrolled offscreen to the left
-          // console.log(storedDots.map(function(e) { return e.row; }).indexOf(farRight)) //this line is calling on every mouse movement
-          establishedRightSide = false
+//       if (Math.abs(storedDots[i].mesh.position.x - cameraO.position.x) > fadeDistanceX || Math.abs(storedDots[i].mesh.position.y - cameraO.position.x) > fadeDistanceY) {
+//         if (storedDots[i].mesh.position.x - cameraO.position.x < 0) {//a box scrolled offscreen to the left
+//           // console.log(storedDots.map(function(e) { return e.row; }).indexOf(farRight)) //this line is calling on every mouse movement
+//           establishedRightSide = false
           
-          let newX = storedDots[storedDots.map(function(e) { return e.row; }).indexOf(farRight)].mesh.position.x + 1
+//           let newX = storedDots[storedDots.map(function(e) { return e.row; }).indexOf(farRight)].mesh.position.x + 1
 
-          // console.log(newX)
-          let newMesh = new THREE.PlaneGeometry( 0.9, 0.9 )
-          let newMaterial = new THREE.MeshBasicMaterial( {color: white, side: THREE.DoubleSide} )
-          const plane = new THREE.Mesh(newMesh, newMaterial);
-          plane.position.x = newX
-          plane.position.y = storedDots[i].mesh.position.y
-          plane.renderOrder = 1
-          scene.add(plane)
-
-
-          let newOutline = new THREE.PlaneGeometry( 1, 1 )
-          let newOutlineMaterial = new THREE.MeshBasicMaterial( {color: black, side: THREE.DoubleSide} )
-          const planeOutline = new THREE.Mesh(newOutline, newOutlineMaterial);
-          planeOutline.position.x = newX
-          planeOutline.position.y = storedDots[i].outline.position.y
-          planeOutline.position.z -= 5
-          scene.add(planeOutline)
-
-          let newRow = Math.max(...storedDots.map(o => o.row), 0)
-          let newColumn = storedDots[i].column + 1
+//           // console.log(newX)
+//           let newMesh = new THREE.PlaneGeometry( 0.9, 0.9 )
+//           let newMaterial = new THREE.MeshBasicMaterial( {color: white, side: THREE.DoubleSide} )
+//           const plane = new THREE.Mesh(newMesh, newMaterial);
+//           plane.position.x = newX
+//           plane.position.y = storedDots[i].mesh.position.y
+//           plane.renderOrder = 1
+//           scene.add(plane)
 
 
-          let replacementDot = new DOT(newRow, newColumn, false, plane, planeOutline)
-          toBeSpliced.push(i)
-          newDotArray.push(replacementDot)
-          console.log(replacementDot)
-          // let replacementDot = new DOT((Math.max.apply(Math, storedDots.map(function(o) { return o.row; }))) + 1, storedDots[i].column, false)
-        } else if (storedDots[i].mesh.position.x - cameraO.position.x > 0){//a box scrolled offscreen to the right
-          let replacementDot = new DOT()
-        } else {
+//           let newOutline = new THREE.PlaneGeometry( 1, 1 )
+//           let newOutlineMaterial = new THREE.MeshBasicMaterial( {color: black, side: THREE.DoubleSide} )
+//           const planeOutline = new THREE.Mesh(newOutline, newOutlineMaterial);
+//           planeOutline.position.x = newX
+//           planeOutline.position.y = storedDots[i].outline.position.y
+//           planeOutline.position.z -= 5
+//           scene.add(planeOutline)
 
-        }
-        // storedDots.splice(i, 1)
-        //generate another dot on the opposite side of the deleted dot
-      }
+//           let newRow = Math.max(...storedDots.map(o => o.row), 0)
+//           let newColumn = storedDots[i].column + 1
 
-      // if (storedDots[i].mesh.position.distanceTo(cameraO.position) > fadeDistance) {
-      //   storedDots.splice(i, i+1)
-      // }
-    }
-    storedDots = newDotArray
-    for (let i = toBeSpliced.length - 1; i > 0; i--) {
-      storedDots.splice(toBeSpliced[i], 1)
-    }
-    toBeSpliced = []
+
+//           let replacementDot = new DOT(newRow, newColumn, false, plane, planeOutline)
+//           toBeSpliced.push(i)
+//           newDotArray.push(replacementDot)
+//           console.log(replacementDot)
+//           // let replacementDot = new DOT((Math.max.apply(Math, storedDots.map(function(o) { return o.row; }))) + 1, storedDots[i].column, false)
+//         } else if (storedDots[i].mesh.position.x - cameraO.position.x > 0){//a box scrolled offscreen to the right
+//           let replacementDot = new DOT()
+//         } else {
+
+//         }
+//         // storedDots.splice(i, 1)
+//         //generate another dot on the opposite side of the deleted dot
+//       }
+
+//       // if (storedDots[i].mesh.position.distanceTo(cameraO.position) > fadeDistance) {
+//       //   storedDots.splice(i, i+1)
+//       // }
+//     }
+//     storedDots = newDotArray
+//     for (let i = toBeSpliced.length - 1; i > 0; i--) {
+//       storedDots.splice(toBeSpliced[i], 1)
+//     }
+//     toBeSpliced = []
     
-  }
-  cameraO.updateProjectionMatrix()
+//   }
+//   cameraO.updateProjectionMatrix()
   
-  // console.log(storedDots)
-}
-// renderVisibleDots()
+//   // console.log(storedDots)
+// }
+// // renderVisibleDots()
 
 
 
@@ -347,15 +353,14 @@ const renderByRowColumn = () => {
       }
     }
   } else {
-    let rightEdge
-    let leftEdge
+
     let toBeSpliced = []
     let rightEdgePieces = []
     let leftEdgePieces = []
     
-    console.log(storedDots[0].mesh.position.x)
-    if (storedDots[0].mesh.position.x < 0) { //a box scrolled offscreen to the left //except not and this line needs to be fixed to better determine that
-      previousStart = storedDots[0].mesh.position.x
+    console.log(storedDots[0].mesh.position.x) //when this equals 7 it regenerates the left column?
+    if (storedDots[0].mesh.position.x < 0 && storedDots[0].mesh.position.x < previousStart) { //a box scrolled offscreen to the left //except not and this line needs to be fixed to better determine that
+      // previousStart = storedDots[0].mesh.position.x
 
       rightEdge = Math.max(...storedDots.map(o => o.row), 0)
       leftEdge = Math.min(...storedDots.map(o => o.row))
@@ -431,8 +436,8 @@ const renderByRowColumn = () => {
 
 
 
-    } else if (storedDots[storedDots.length-1].mesh.position.x > 0) { //a box scrolled offscreen to the right
-      previousStart = storedDots[0].mesh.position.x
+    } else if (storedDots[storedDots.map(function(e) { return e.row; }).indexOf(Math.max(...storedDots.map(o => o.row), 0))].mesh.position.x > 0 && storedDots[storedDots.map(function(e) { return e.row; }).indexOf(Math.max(...storedDots.map(o => o.row), 0))].mesh.position.x > previousStart) { //a box scrolled offscreen to the right
+      // previousStart = storedDots[0].mesh.position.x
 
       rightEdge = Math.max(...storedDots.map(o => o.row), 0)
       leftEdge = Math.min(...storedDots.map(o => o.row))
