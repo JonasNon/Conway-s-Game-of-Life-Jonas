@@ -70,6 +70,9 @@ let oldx = 0;
 let oldy = 0;
 let moudulusCounter = 17
 let leftModulusCounter = 17
+let farthestRightDot
+let farthestLeftDot
+
 
 const onMouseMove = (e) =>{
   // console.log("Mouse Movement")
@@ -92,8 +95,14 @@ const onMouseMove = (e) =>{
       storedDots[i].outline.position.y -= e.movementY/panSpeed
     }
 
+    farthestRightDot = storedDots[storedDots.map(function(e) { return e.row; }).indexOf(Math.max(...storedDots.map(o => o.row)))]
+    farthestLeftDot = storedDots[storedDots.map(function(e) { return e.row; }).indexOf(Math.min(...storedDots.map(o => o.row)))]
+    //the indexof above is trying to get a negative number?
 
-    
+    console.log(farthestLeftDot, "left")
+    console.log(farthestRightDot, "right")
+    console.log(Math.max(...storedDots.map(o => o.row))) //once this reaches 0 things start to break
+
     oldx = e.pageX;
     oldy = e.pageY;
 
@@ -103,16 +112,16 @@ const onMouseMove = (e) =>{
     // console.log(storedDots[0].mesh.position.x)
     // console.log(Math.abs(Math.trunc(storedDots[0].mesh.position.x)) % moudulusCounter)
     // console.log(moudulusCounter)
-    console.log(storedDots[storedDots.length-1])
+    // console.log(storedDots[storedDots.length-1])
     // storedDots[storedDots.length-1].mesh.material.color.setHex(lime)
-    storedDots[0].mesh.material.color.setHex(lime)
-    storedDots[storedDots.map(function(e) { return e.row; }).indexOf(Math.max(...storedDots.map(o => o.row), 0))].mesh.material.color.setHex(lime)
+    // farthestLeftDot.mesh.material.color.setHex(lime)
+    // farthestRightDot.mesh.material.color.setHex(lime)
     cameraO.updateProjectionMatrix()
     
-    console.log(Math.abs(Math.trunc(storedDots[storedDots.length-1].mesh.position.x)))
-    if (Math.abs(Math.trunc(storedDots[0].mesh.position.x)) % moudulusCounter == 0) {
+    console.log(Math.abs(Math.trunc(farthestRightDot.mesh.position.x)))
+    if (Math.abs(Math.trunc(farthestLeftDot.mesh.position.x)) % moudulusCounter == 0) {
       renderByRowColumn()
-    } else if (Math.trunc(storedDots[storedDots.map(function(e) { return e.row; }).indexOf(Math.max(...storedDots.map(o => o.row), 0))].mesh.position.x) % leftModulusCounter == 0) {
+    } else if (Math.trunc(farthestRightDot.mesh.position.x) % leftModulusCounter == 0) {
       renderByRowColumn()
     }
 
@@ -358,11 +367,12 @@ const renderByRowColumn = () => {
     let rightEdgePieces = []
     let leftEdgePieces = []
     
+    
     console.log(storedDots[0].mesh.position.x) //when this equals 7 it regenerates the left column?
-    if (storedDots[0].mesh.position.x < 0 && storedDots[0].mesh.position.x < previousStart) { //a box scrolled offscreen to the left //except not and this line needs to be fixed to better determine that
+    if (farthestLeftDot.mesh.position.x < 0 && farthestLeftDot.mesh.position.x < previousStart) { //a box scrolled offscreen to the left //except not and this line needs to be fixed to better determine that
       // previousStart = storedDots[0].mesh.position.x
 
-      rightEdge = Math.max(...storedDots.map(o => o.row), 0)
+      rightEdge = Math.max(...storedDots.map(o => o.row))
       leftEdge = Math.min(...storedDots.map(o => o.row))
       console.log(leftEdge)
 
@@ -436,12 +446,12 @@ const renderByRowColumn = () => {
 
 
 
-    } else if (storedDots[storedDots.map(function(e) { return e.row; }).indexOf(Math.max(...storedDots.map(o => o.row), 0))].mesh.position.x > 0 && storedDots[storedDots.map(function(e) { return e.row; }).indexOf(Math.max(...storedDots.map(o => o.row), 0))].mesh.position.x > previousStart) { //a box scrolled offscreen to the right
+    } else if (farthestRightDot.mesh.position.x > 0 && farthestRightDot.mesh.position.x > previousStart) { //a box scrolled offscreen to the right
       // previousStart = storedDots[0].mesh.position.x
 
-      rightEdge = Math.max(...storedDots.map(o => o.row), 0)
+      rightEdge = Math.max(...storedDots.map(o => o.row))
       leftEdge = Math.min(...storedDots.map(o => o.row))
-      console.log(rightEdge)
+      // console.log(rightEdge)
 
 
       newDotArray = storedDots
@@ -449,7 +459,7 @@ const renderByRowColumn = () => {
       rightEdgePieces = []
       leftEdgePieces = []
       
-      console.log(storedDots.length)
+      // console.log(storedDots.length)
 
       for (let j = 0; j < storedDots.length; j++) {
         if (storedDots[j].row == rightEdge) {
@@ -497,7 +507,7 @@ const renderByRowColumn = () => {
 
       }
       storedDots = newDotArray
-      console.log(rightEdge)
+      // console.log(rightEdge)
       // console.log(storedDots)
       for (let i = storedDots.length - 1; i >= 0; i--) {
         // console.log()
