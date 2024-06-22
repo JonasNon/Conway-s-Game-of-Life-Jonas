@@ -9,7 +9,7 @@ let white = 0xFFFFFF
 
 let zoomAdjuster = 100 //bigger number = more zoomed in
 let storedDots = []
-let panSpeed = 150 //lower number = faster panning
+let panSpeed = 50 //lower number = faster panning
 let zoomSpeed = .0001; //
 let gridWidth = screen.width/50  // starting grid size
 let gridHeight = screen.height/50
@@ -99,9 +99,9 @@ const onMouseMove = (e) =>{
     farthestLeftDot = storedDots[storedDots.map(function(e) { return e.row; }).indexOf(Math.min(...storedDots.map(o => o.row)))]
     //the indexof above is trying to get a negative number?
 
-    console.log(farthestLeftDot, "left")
-    console.log(farthestRightDot, "right")
-    console.log(Math.max(...storedDots.map(o => o.row))) //once this reaches 0 things start to break
+    // console.log(farthestLeftDot, "left")
+    // console.log(farthestRightDot, "right")
+    // console.log(Math.max(...storedDots.map(o => o.row))) //once this reaches 0 things start to break
 
     oldx = e.pageX;
     oldy = e.pageY;
@@ -114,8 +114,8 @@ const onMouseMove = (e) =>{
     // console.log(moudulusCounter)
     // console.log(storedDots[storedDots.length-1])
     // storedDots[storedDots.length-1].mesh.material.color.setHex(lime)
-    // farthestLeftDot.mesh.material.color.setHex(lime)
-    // farthestRightDot.mesh.material.color.setHex(lime)
+    farthestLeftDot.mesh.material.color.setHex(lime)
+    farthestRightDot.mesh.material.color.setHex(lime)
     cameraO.updateProjectionMatrix()
     
     console.log(Math.abs(Math.trunc(farthestRightDot.mesh.position.x)))
@@ -135,9 +135,7 @@ renderer.domElement.addEventListener('mousemove', onMouseMove)
 
 
 
-
-
-function zoom(event) {
+function zoom(event) { //completely broken do NOT zoom under any circumstance
   event.preventDefault();
   console.log(event)
 
@@ -195,142 +193,17 @@ class DOT {
 
 
 
-//add modulus that once passes, adds the amount of the modulus to a counter. that counter subtracts from camereO.position.x 
-
-let distanceCounter = 0
-
-
-let establishedRightSide = false
-let farRight
-
-
-
-
-
-// const renderVisibleDots = () => {
-//   if (storedDots[0] == undefined) {
-//     for (let w = 0; w < gridWidth; w++) {
-//       for (let h = 0; h < gridHeight; h++) {
-        
-      
-//         let newMesh = new THREE.PlaneGeometry( 0.9, 0.9 )
-//         let newMaterial = new THREE.MeshBasicMaterial( {color: white, side: THREE.DoubleSide} )
-//         const plane = new THREE.Mesh(newMesh, newMaterial);
-//         plane.position.x = w - gridWidth/2
-//         plane.position.y = h - gridHeight/2
-//         plane.renderOrder = 1
-//         scene.add(plane)
-
-
-//         let newOutline = new THREE.PlaneGeometry( 1, 1 )
-//         let newOutlineMaterial = new THREE.MeshBasicMaterial( {color: black, side: THREE.DoubleSide} )
-//         const planeOutline = new THREE.Mesh(newOutline, newOutlineMaterial);
-//         planeOutline.position.x = w - gridWidth/2
-//         planeOutline.position.y = h - gridHeight/2
-//         planeOutline.position.z -= 5
-//         planeOutline.renderOrder = 1
-//         scene.add(planeOutline)
-
-        
-//         let newDot = new DOT(w, h, false, plane, planeOutline)
-//         newDot.x = w
-//         newDot.y = h
-//         storedDots.push(newDot)
-//         // console.log(newDot)
-    
-
-        
-//       }
-//     }
-//   } else {
-//     // console.log((storedDots[0].mesh.position.x - cameraO.position.x))
-//     let newDotArray = storedDots
-//     let toBeSpliced = []
-//     if (establishedRightSide != true) {
-//       farRight = Math.max(...storedDots.map(o => o.row), 0);
-//       establishedRightSide = true
-//     }
-//     for (let i = 0; i < storedDots.length; i++) {
-//       // console.log(storedDots[0].mesh.position.x - cameraO.position.x)
-
-//       if (Math.round(storedDots[i].mesh.position.x - cameraO.position.x) % (fadeDistanceX - distanceCounter)) {}
-
-//       if (Math.abs(storedDots[i].mesh.position.x - cameraO.position.x) > fadeDistanceX || Math.abs(storedDots[i].mesh.position.y - cameraO.position.x) > fadeDistanceY) {
-//         if (storedDots[i].mesh.position.x - cameraO.position.x < 0) {//a box scrolled offscreen to the left
-//           // console.log(storedDots.map(function(e) { return e.row; }).indexOf(farRight)) //this line is calling on every mouse movement
-//           establishedRightSide = false
-          
-//           let newX = storedDots[storedDots.map(function(e) { return e.row; }).indexOf(farRight)].mesh.position.x + 1
-
-//           // console.log(newX)
-//           let newMesh = new THREE.PlaneGeometry( 0.9, 0.9 )
-//           let newMaterial = new THREE.MeshBasicMaterial( {color: white, side: THREE.DoubleSide} )
-//           const plane = new THREE.Mesh(newMesh, newMaterial);
-//           plane.position.x = newX
-//           plane.position.y = storedDots[i].mesh.position.y
-//           plane.renderOrder = 1
-//           scene.add(plane)
-
-
-//           let newOutline = new THREE.PlaneGeometry( 1, 1 )
-//           let newOutlineMaterial = new THREE.MeshBasicMaterial( {color: black, side: THREE.DoubleSide} )
-//           const planeOutline = new THREE.Mesh(newOutline, newOutlineMaterial);
-//           planeOutline.position.x = newX
-//           planeOutline.position.y = storedDots[i].outline.position.y
-//           planeOutline.position.z -= 5
-//           scene.add(planeOutline)
-
-//           let newRow = Math.max(...storedDots.map(o => o.row), 0)
-//           let newColumn = storedDots[i].column + 1
-
-
-//           let replacementDot = new DOT(newRow, newColumn, false, plane, planeOutline)
-//           toBeSpliced.push(i)
-//           newDotArray.push(replacementDot)
-//           console.log(replacementDot)
-//           // let replacementDot = new DOT((Math.max.apply(Math, storedDots.map(function(o) { return o.row; }))) + 1, storedDots[i].column, false)
-//         } else if (storedDots[i].mesh.position.x - cameraO.position.x > 0){//a box scrolled offscreen to the right
-//           let replacementDot = new DOT()
-//         } else {
-
-//         }
-//         // storedDots.splice(i, 1)
-//         //generate another dot on the opposite side of the deleted dot
-//       }
-
-//       // if (storedDots[i].mesh.position.distanceTo(cameraO.position) > fadeDistance) {
-//       //   storedDots.splice(i, i+1)
-//       // }
-//     }
-//     storedDots = newDotArray
-//     for (let i = toBeSpliced.length - 1; i > 0; i--) {
-//       storedDots.splice(toBeSpliced[i], 1)
-//     }
-//     toBeSpliced = []
-    
-//   }
-//   cameraO.updateProjectionMatrix()
-  
-//   // console.log(storedDots)
-// }
-// // renderVisibleDots()
-
-
-
-
-
-
-
-
 
 
 let previousStart
 let newDotArray
 const renderByRowColumn = () => {
-  if (storedDots[0] == undefined) {
+  if (storedDots[0] == undefined) { //if this array is undefined then no dots have been rendered, and this function will render a w x h grid of dots
     for (let w = 0; w < gridWidth; w++) {
       for (let h = 0; h < gridHeight; h++) {
         
+        
+
       
         let newMesh = new THREE.PlaneGeometry( 0.9, 0.9 )
         let newMaterial = new THREE.MeshBasicMaterial( {color: white, side: THREE.DoubleSide} )
@@ -368,8 +241,8 @@ const renderByRowColumn = () => {
     let leftEdgePieces = []
     
     
-    console.log(storedDots[0].mesh.position.x) //when this equals 7 it regenerates the left column?
-    if (farthestLeftDot.mesh.position.x < 0 && farthestLeftDot.mesh.position.x < previousStart) { //a box scrolled offscreen to the left //except not and this line needs to be fixed to better determine that
+    // console.log(storedDots[0].mesh.position.x) //when this equals 7 it regenerates the left column?
+    if (farthestLeftDot.mesh.position.x < previousStart) { //a box scrolled offscreen to the left //except not and this line needs to be fixed to better determine that
       // previousStart = storedDots[0].mesh.position.x
 
       rightEdge = Math.max(...storedDots.map(o => o.row))
@@ -400,36 +273,17 @@ const renderByRowColumn = () => {
 
 
       for (let r = 0; r < rightEdgePieces.length; r++) {
-        // console.log("Hello",newX, newY)
 
-        // let newY = storedDots[storedDots.map(function(e) { return e.row; }).indexOf(rightEdge - 1)].mesh.position.y
         let newX = rightEdgePieces[r].mesh.position.x + 1
         let newY = rightEdgePieces[r].mesh.position.y
 
-        let newMesh = new THREE.PlaneGeometry( 0.9, 0.9 )
-        let newMaterial = new THREE.MeshBasicMaterial( {color: white, side: THREE.DoubleSide} )
-        const plane = new THREE.Mesh(newMesh, newMaterial);
-        plane.position.x = newX
-        plane.position.y = newY
-        plane.renderOrder = 1
-        scene.add(plane)
-  
-  
-        let newOutline = new THREE.PlaneGeometry( 1, 1 )
-        let newOutlineMaterial = new THREE.MeshBasicMaterial( {color: black, side: THREE.DoubleSide} )
-        const planeOutline = new THREE.Mesh(newOutline, newOutlineMaterial);
-        planeOutline.position.x = newX
-        planeOutline.position.y = newY
-        planeOutline.position.z -= 5
-        planeOutline.renderOrder = 1
-        scene.add(planeOutline)
-
+        let newGeometry = generatePlanes(newX, newY)
 
         let newRow = rightEdgePieces[r].row + 1
         let newColumn = storedDots[r].column
 
 
-        let replacementDot = new DOT(newRow, newColumn, false, plane, planeOutline)
+        let replacementDot = new DOT(newRow, newColumn, false, newGeometry.plane, newGeometry.planeOutline)
         newDotArray.push(replacementDot)
 
       }
@@ -445,8 +299,8 @@ const renderByRowColumn = () => {
       toBeSpliced = []
 
 
-
-    } else if (farthestRightDot.mesh.position.x > 0 && farthestRightDot.mesh.position.x > previousStart) { //a box scrolled offscreen to the right
+      // farthestRightDot.mesh.position.x > 0 && 
+    } else if (farthestRightDot.mesh.position.x > previousStart) { //a box scrolled offscreen to the right
       // previousStart = storedDots[0].mesh.position.x
 
       rightEdge = Math.max(...storedDots.map(o => o.row))
@@ -479,30 +333,13 @@ const renderByRowColumn = () => {
         let newX = leftEdgePieces[r].mesh.position.x - 1
         let newY = leftEdgePieces[r].mesh.position.y
 
-        let newMesh = new THREE.PlaneGeometry( 0.9, 0.9 )
-        let newMaterial = new THREE.MeshBasicMaterial( {color: white, side: THREE.DoubleSide} )
-        const plane = new THREE.Mesh(newMesh, newMaterial);
-        plane.position.x = newX
-        plane.position.y = newY
-        plane.renderOrder = 1
-        scene.add(plane)
-  
-  
-        let newOutline = new THREE.PlaneGeometry( 1, 1 )
-        let newOutlineMaterial = new THREE.MeshBasicMaterial( {color: black, side: THREE.DoubleSide} )
-        const planeOutline = new THREE.Mesh(newOutline, newOutlineMaterial);
-        planeOutline.position.x = newX
-        planeOutline.position.y = newY
-        planeOutline.position.z -= 5
-        planeOutline.renderOrder = 1
-        scene.add(planeOutline)
-
+        let newGeometry = generatePlanes(newX, newY)
 
         let newRow = leftEdgePieces[r].row - 1
         let newColumn = storedDots[r].column
 
 
-        let replacementDot = new DOT(newRow, newColumn, false, plane, planeOutline)
+        let replacementDot = new DOT(newRow, newColumn, false, newGeometry.plane, newGeometry.planeOutline)
         newDotArray.push(replacementDot)
 
       }
@@ -524,3 +361,32 @@ const renderByRowColumn = () => {
   cameraO.updateProjectionMatrix()
 }
 renderByRowColumn()
+
+
+
+
+
+const generatePlanes = (xPos, yPos) => {
+  let newMesh = new THREE.PlaneGeometry( 0.9, 0.9 )
+  let newMaterial = new THREE.MeshBasicMaterial( {color: white, side: THREE.DoubleSide} )
+  const plane = new THREE.Mesh(newMesh, newMaterial);
+  plane.position.x = xPos
+  plane.position.y = yPos
+  plane.renderOrder = 1
+  scene.add(plane)
+
+
+  let newOutline = new THREE.PlaneGeometry( 1, 1 )
+  let newOutlineMaterial = new THREE.MeshBasicMaterial( {color: black, side: THREE.DoubleSide} )
+  const planeOutline = new THREE.Mesh(newOutline, newOutlineMaterial);
+  planeOutline.position.x = xPos
+  planeOutline.position.y = yPos
+  planeOutline.position.z -= 5
+  planeOutline.renderOrder = 1
+  scene.add(planeOutline)
+
+  return {
+    plane: plane,
+    planeOutline: planeOutline
+  }
+}
