@@ -18,6 +18,8 @@ let fadeDistanceX = screen.availWidth/90
 let fadeDistanceY = screen.availHeight/90
 let rightEdge
 let leftEdge
+let topEdge
+let bottomEdge
 
 
 
@@ -68,12 +70,23 @@ renderer.domElement.addEventListener('contextmenu', event => event.preventDefaul
 
 let oldx = 0;
 let oldy = 0;
-let moudulusCounter = 17
 let leftModulusCounter = 17
+let rightMoudulusCounter = 17
+let upperModulusCounter = 9
+let lowerModulusCounter = -6
 let farthestRightDot
 let farthestLeftDot
+let farthestUpDot
+let farthestDownDot
+
+let oldFarthestRightDot
+let oldFarthestLeftDot
+let oldFarthestUpDot
+let oldFarthestDownDot
 
 
+
+let once = true
 const onMouseMove = (e) =>{
   // console.log("Mouse Movement")
   if (mouseDown) {
@@ -97,7 +110,17 @@ const onMouseMove = (e) =>{
 
     farthestRightDot = storedDots[storedDots.map(function(e) { return e.row; }).indexOf(Math.max(...storedDots.map(o => o.row)))]
     farthestLeftDot = storedDots[storedDots.map(function(e) { return e.row; }).indexOf(Math.min(...storedDots.map(o => o.row)))]
-    //the indexof above is trying to get a negative number?
+    farthestUpDot = storedDots[storedDots.map(function(e) { return e.column; }).indexOf(Math.max(...storedDots.map(o => o.column)))]
+    farthestDownDot = storedDots[storedDots.map(function(e) { return e.column; }).indexOf(Math.min(...storedDots.map(o => o.column)))]
+
+    if (once) {
+      once = false
+
+    }
+
+
+    // console.log("up: ", farthestUpDot, "down: ", farthestDownDot)
+
 
     // console.log(farthestLeftDot, "left")
     // console.log(farthestRightDot, "right")
@@ -116,13 +139,30 @@ const onMouseMove = (e) =>{
     // storedDots[storedDots.length-1].mesh.material.color.setHex(lime)
     farthestLeftDot.mesh.material.color.setHex(lime)
     farthestRightDot.mesh.material.color.setHex(lime)
+    farthestUpDot.mesh.material.color.setHex(lime)
+    farthestDownDot.mesh.material.color.setHex(lime)
     cameraO.updateProjectionMatrix()
     
-    console.log(Math.abs(Math.trunc(farthestRightDot.mesh.position.x)))
-    if (Math.abs(Math.trunc(farthestLeftDot.mesh.position.x)) % moudulusCounter == 0) {
-      renderByRowColumn()
-    } else if (Math.trunc(farthestRightDot.mesh.position.x) % leftModulusCounter == 0) {
-      renderByRowColumn()
+    // console.log(Math.abs(Math.trunc(farthestRightDot.mesh.position.x)))
+    console.log("Down: ",farthestDownDot.mesh.position.y)
+
+    //these four ifs determine what direction the dots should to be generated in
+    // console.log(oldFarthestLeftDot, farthestLeftDot) 
+
+    console.log("Up",farthestUpDot.mesh.position.y)
+
+
+    //sometimes the farthest dot num skips the number it should modulus againts? theyby skipping the regen
+    //seems to happen at a fixed height/depth though
+
+    if (Math.abs(Math.trunc(farthestLeftDot.mesh.position.x)) % leftModulusCounter == 0) {
+      renderByRowColumn("left")
+    } else if (Math.trunc(farthestRightDot.mesh.position.x) % rightMoudulusCounter == 0) {
+      renderByRowColumn("right")
+    } else if (Math.trunc(farthestDownDot.mesh.position.y) % upperModulusCounter == 0 || Math.trunc(farthestDownDot.mesh.position.y) % (upperModulusCounter + 4) == 0) {
+      renderByRowColumn("up")
+    } else if (Math.trunc(farthestDownDot.mesh.position.y) % lowerModulusCounter == 0) {
+      renderByRowColumn("down")
     }
 
   } else {
@@ -197,7 +237,7 @@ class DOT {
 
 let previousStart
 let newDotArray
-const renderByRowColumn = () => {
+const renderByRowColumn = (direction) => {
   if (storedDots[0] == undefined) { //if this array is undefined then no dots have been rendered, and this function will render a w x h grid of dots
     for (let w = 0; w < gridWidth; w++) {
       for (let h = 0; h < gridHeight; h++) {
@@ -229,8 +269,13 @@ const renderByRowColumn = () => {
         newDot.y = h
         storedDots.push(newDot)
         // console.log(newDot)
-        previousStart = storedDots[0].mesh.position.x
+        
+        previousStart = storedDots[0].mesh.position
 
+        oldFarthestRightDot = farthestRightDot
+        oldFarthestLeftDot = farthestLeftDot
+        oldFarthestUpDot = farthestUpDot
+        oldFarthestDownDot = farthestDownDot
         
       }
     }
@@ -239,18 +284,32 @@ const renderByRowColumn = () => {
     let toBeSpliced = []
     let rightEdgePieces = []
     let leftEdgePieces = []
+    let topEdgePieces = []
+    let bottomEdgePieces = []
     
-    
+    //instead of that \/ if statment, to a math.max of the relative ditances with x,-x,y,-y from the start and the largest value is the if we go into
+
+    console.log(direction)
+
+    if (direction == "up") {
+      console.log("go up")
+    } else if (direction == "down") {
+      console.log("go down")
+    } else if (direction == "left") {
+      console.log("go left")
+    } else if (direction == "right") {
+      console.log("go right")
+    }
     // console.log(storedDots[0].mesh.position.x) //when this equals 7 it regenerates the left column?
-    if (farthestLeftDot.mesh.position.x < previousStart) { //a box scrolled offscreen to the left //except not and this line needs to be fixed to better determine that
+    if (direction == "left") { //a box scrolled offscreen to the left //except not and this line needs to be fixed to better determine that
       // previousStart = storedDots[0].mesh.position.x
+      previousStart = storedDots[0].mesh.position
 
       rightEdge = Math.max(...storedDots.map(o => o.row))
       leftEdge = Math.min(...storedDots.map(o => o.row))
       console.log(leftEdge)
 
 
-      newDotArray = storedDots
       toBeSpliced = []
       rightEdgePieces = []
       leftEdgePieces = []
@@ -280,14 +339,13 @@ const renderByRowColumn = () => {
         let newGeometry = generatePlanes(newX, newY)
 
         let newRow = rightEdgePieces[r].row + 1
-        let newColumn = storedDots[r].column
+        let newColumn = rightEdgePieces[r].column
 
 
         let replacementDot = new DOT(newRow, newColumn, false, newGeometry.plane, newGeometry.planeOutline)
-        newDotArray.push(replacementDot)
+        storedDots.push(replacementDot)
 
       }
-      storedDots = newDotArray
       console.log(leftEdge)
       // console.log(storedDots)
       for (let i = storedDots.length - 1; i >= 0; i--) {
@@ -300,8 +358,10 @@ const renderByRowColumn = () => {
 
 
       // farthestRightDot.mesh.position.x > 0 && 
-    } else if (farthestRightDot.mesh.position.x > previousStart) { //a box scrolled offscreen to the right
+    } else if (direction == "right") { //a box scrolled offscreen to the right
       // previousStart = storedDots[0].mesh.position.x
+      
+      previousStart = storedDots[0].mesh.position
 
       rightEdge = Math.max(...storedDots.map(o => o.row))
       leftEdge = Math.min(...storedDots.map(o => o.row))
@@ -336,14 +396,13 @@ const renderByRowColumn = () => {
         let newGeometry = generatePlanes(newX, newY)
 
         let newRow = leftEdgePieces[r].row - 1
-        let newColumn = storedDots[r].column
+        let newColumn = leftEdgePieces[r].column
 
 
         let replacementDot = new DOT(newRow, newColumn, false, newGeometry.plane, newGeometry.planeOutline)
-        newDotArray.push(replacementDot)
+        storedDots.push(replacementDot)
 
       }
-      storedDots = newDotArray
       // console.log(rightEdge)
       // console.log(storedDots)
       for (let i = storedDots.length - 1; i >= 0; i--) {
@@ -355,10 +414,116 @@ const renderByRowColumn = () => {
       toBeSpliced = []
      //do deletion of right edge and generation of an edge to the left
 
+    } else if (direction == "up") { //a box scrolled offscreen to the bottom
+
+      topEdge = Math.max(...storedDots.map(o => o.column))
+      bottomEdge = Math.min(...storedDots.map(o => o.column))
+      // console.log(rightEdge)
+
+
+      toBeSpliced = []
+      topEdgePieces = []
+      bottomEdgePieces = []
+      
+      // console.log(storedDots.length)
+
+      for (let j = 0; j < storedDots.length; j++) {
+        if (storedDots[j].column == topEdge) {
+          topEdgePieces.push(storedDots[j])
+          toBeSpliced.push(j)
+        }
+      }
+      for (let j = 0; j < storedDots.length; j++) {
+        if (storedDots[j].column == bottomEdge) {
+          bottomEdgePieces.push(storedDots[j])
+        }
+      }
+
+
+      for (let r = 0; r < topEdgePieces.length; r++) {
+
+        let newX = topEdgePieces[r].mesh.position.x 
+        let newY = topEdgePieces[r].mesh.position.y + 1
+
+        let newGeometry = generatePlanes(newX, newY)
+
+        let newRow = topEdgePieces[r].row 
+        let newColumn = topEdgePieces[r].column + 1
+
+
+        let replacementDot = new DOT(newRow, newColumn, false, newGeometry.plane, newGeometry.planeOutline)
+        storedDots.push(replacementDot)
+
+      }
+      // console.log(rightEdge)
+      // console.log(storedDots)
+      for (let i = storedDots.length - 1; i >= 0; i--) {
+        // console.log()
+        if (storedDots[i].column == bottomEdge) {
+          storedDots.splice(i, 1)
+        }
+      }
+      toBeSpliced = []
+
+    } else if (direction == "down") { //a box scrolled offscreen to the top
+      topEdge = Math.max(...storedDots.map(o => o.column))
+      bottomEdge = Math.min(...storedDots.map(o => o.column))
+      // console.log(rightEdge)
+
+      toBeSpliced = []
+      topEdgePieces = []
+      bottomEdgePieces = []
+      
+      // console.log(storedDots.length)
+
+      for (let j = 0; j < storedDots.length; j++) {
+        if (storedDots[j].column == topEdge) {
+          topEdgePieces.push(storedDots[j])
+          toBeSpliced.push(j)
+        }
+      }
+      for (let j = 0; j < storedDots.length; j++) {
+        if (storedDots[j].column == bottomEdge) {
+          bottomEdgePieces.push(storedDots[j])
+        }
+      }
+
+
+      for (let r = 0; r < topEdgePieces.length; r++) {
+
+        let newX = bottomEdgePieces[r].mesh.position.x 
+        let newY = bottomEdgePieces[r].mesh.position.y - 1
+
+        let newGeometry = generatePlanes(newX, newY)
+
+        let newRow = bottomEdgePieces[r].row
+        let newColumn = bottomEdgePieces[r].column - 1
+
+
+        let replacementDot = new DOT(newRow, newColumn, false, newGeometry.plane, newGeometry.planeOutline)
+        storedDots.push(replacementDot)
+
+      }
+      // console.log(rightEdge)
+      // console.log(storedDots)
+      for (let i = storedDots.length - 1; i >= 0; i--) {
+        // console.log()
+        if (storedDots[i].column == topEdge) {
+          storedDots.splice(i, 1)
+        }
+      }
+      toBeSpliced = []
+
     }
 
   }
   cameraO.updateProjectionMatrix()
+
+  oldFarthestRightDot = farthestRightDot
+  oldFarthestLeftDot = farthestLeftDot
+  oldFarthestUpDot = farthestUpDot
+  oldFarthestDownDot = farthestDownDot
+
 }
 renderByRowColumn()
 
