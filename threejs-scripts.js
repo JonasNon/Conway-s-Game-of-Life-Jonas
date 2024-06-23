@@ -104,8 +104,8 @@ const onMouseMove = (e) =>{
       storedDots[i].mesh.position.x += e.movementX/panSpeed
       storedDots[i].mesh.position.y -= e.movementY/panSpeed
 
-      storedDots[i].outline.position.x += e.movementX/panSpeed
-      storedDots[i].outline.position.y -= e.movementY/panSpeed
+      // storedDots[i].outline.position.x += e.movementX/panSpeed
+      // storedDots[i].outline.position.y -= e.movementY/panSpeed
     }
 
     farthestRightDot = storedDots[storedDots.map(function(e) { return e.row; }).indexOf(Math.max(...storedDots.map(o => o.row)))]
@@ -254,17 +254,17 @@ const renderByRowColumn = (direction) => {
         scene.add(plane)
 
 
-        let newOutline = new THREE.PlaneGeometry( 1, 1 )
-        let newOutlineMaterial = new THREE.MeshBasicMaterial( {color: black, side: THREE.DoubleSide} )
-        const planeOutline = new THREE.Mesh(newOutline, newOutlineMaterial);
-        planeOutline.position.x = w - gridWidth/2
-        planeOutline.position.y = h - gridHeight/2
-        planeOutline.position.z -= 5
-        planeOutline.renderOrder = 1
-        scene.add(planeOutline)
+        // let newOutline = new THREE.PlaneGeometry( 1, 1 )
+        // let newOutlineMaterial = new THREE.MeshBasicMaterial( {color: black, side: THREE.DoubleSide} )
+        // const planeOutline = new THREE.Mesh(newOutline, newOutlineMaterial);
+        // planeOutline.position.x = w - gridWidth/2
+        // planeOutline.position.y = h - gridHeight/2
+        // planeOutline.position.z -= 5
+        // planeOutline.renderOrder = 1
+        // scene.add(planeOutline)
 
         
-        let newDot = new DOT(w, h, false, plane, planeOutline)
+        let newDot = new DOT(w, h, false, plane)
         newDot.x = w
         newDot.y = h
         storedDots.push(newDot)
@@ -342,7 +342,7 @@ const renderByRowColumn = (direction) => {
         let newColumn = rightEdgePieces[r].column
 
 
-        let replacementDot = new DOT(newRow, newColumn, false, newGeometry.plane, newGeometry.planeOutline)
+        let replacementDot = new DOT(newRow, newColumn, false, newGeometry.plane)
         storedDots.push(replacementDot)
 
       }
@@ -399,7 +399,7 @@ const renderByRowColumn = (direction) => {
         let newColumn = leftEdgePieces[r].column
 
 
-        let replacementDot = new DOT(newRow, newColumn, false, newGeometry.plane, newGeometry.planeOutline)
+        let replacementDot = new DOT(newRow, newColumn, false, newGeometry.plane)
         storedDots.push(replacementDot)
 
       }
@@ -451,7 +451,7 @@ const renderByRowColumn = (direction) => {
         let newColumn = topEdgePieces[r].column + 1
 
 
-        let replacementDot = new DOT(newRow, newColumn, false, newGeometry.plane, newGeometry.planeOutline)
+        let replacementDot = new DOT(newRow, newColumn, false, newGeometry.plane)
         storedDots.push(replacementDot)
 
       }
@@ -500,7 +500,7 @@ const renderByRowColumn = (direction) => {
         let newColumn = bottomEdgePieces[r].column - 1
 
 
-        let replacementDot = new DOT(newRow, newColumn, false, newGeometry.plane, newGeometry.planeOutline)
+        let replacementDot = new DOT(newRow, newColumn, false, newGeometry.plane)
         storedDots.push(replacementDot)
 
       }
@@ -541,17 +541,17 @@ const generatePlanes = (xPos, yPos) => {
   scene.add(plane)
 
 
-  let newOutline = new THREE.PlaneGeometry( 1, 1 )
-  let newOutlineMaterial = new THREE.MeshBasicMaterial( {color: black, side: THREE.DoubleSide} )
-  const planeOutline = new THREE.Mesh(newOutline, newOutlineMaterial);
-  planeOutline.position.x = xPos
-  planeOutline.position.y = yPos
-  planeOutline.position.z -= 5
-  planeOutline.renderOrder = 1
-  scene.add(planeOutline)
+  // let newOutline = new THREE.PlaneGeometry( 1, 1 )
+  // let newOutlineMaterial = new THREE.MeshBasicMaterial( {color: black, side: THREE.DoubleSide} )
+  // const planeOutline = new THREE.Mesh(newOutline, newOutlineMaterial);
+  // planeOutline.position.x = xPos
+  // planeOutline.position.y = yPos
+  // planeOutline.position.z -= 5
+  // planeOutline.renderOrder = 1
+  // scene.add(planeOutline)
 
   return {
-    plane: plane,
-    planeOutline: planeOutline
+    plane: plane
+    // planeOutline: planeOutline
   }
 }
