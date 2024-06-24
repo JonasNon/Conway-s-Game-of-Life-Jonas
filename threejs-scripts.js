@@ -115,23 +115,21 @@ const findMiddle = () => {
   //close, but it doesn't count visible living dots right now
 
 
-  var filteredItems = storedDots.filter(function(item){ 
-    if (item.isAlive == false) {
+  let filteredDots = storedDots.filter(function(item){ 
+    if (item.onScreen == true) {
       return item
-    } else {
-      console.log("found life")
-    }
+    } 
    })
 
 
-  // let middleRow = Math.min(...filteredItems.map(o => o.row)) + Math.trunc(((Math.max(...filteredItems.map(o => o.row)) - Math.min(...filteredItems.map(o => o.row)))/2))
-  // let middleColumn = Math.min(...filteredItems.map(o => o.column)) + Math.trunc(((Math.max(...filteredItems.map(o => o.column)) - Math.min(...filteredItems.map(o => o.column)))/2))
+  let middleRow = Math.min(...filteredDots.map(o => o.row)) + Math.trunc(((Math.max(...filteredDots.map(o => o.row)) - Math.min(...filteredDots.map(o => o.row)))/2))
+  let middleColumn = Math.min(...filteredDots.map(o => o.column)) + Math.trunc(((Math.max(...filteredDots.map(o => o.column)) - Math.min(...filteredDots.map(o => o.column)))/2))
 
-  let middleRow = Math.min(...storedDots.map(o => o.row)) + Math.trunc(((Math.max(...storedDots.map(o => o.row)) - Math.min(...storedDots.map(o => o.row)))/2))
-  let middleColumn = Math.min(...storedDots.map(o => o.column)) + Math.trunc(((Math.max(...storedDots.map(o => o.column)) - Math.min(...storedDots.map(o => o.column)))/2))
+  // let middleRow = Math.min(...storedDots.map(o => o.row)) + Math.trunc(((Math.max(...storedDots.map(o => o.row)) - Math.min(...storedDots.map(o => o.row)))/2))
+  // let middleColumn = Math.min(...storedDots.map(o => o.column)) + Math.trunc(((Math.max(...storedDots.map(o => o.column)) - Math.min(...storedDots.map(o => o.column)))/2))
 
-  for (let i = 0; i < storedDots.length; i++) { //if current dot has lowest row value and lowest column value it gets returned
-    if (storedDots[i].row == middleRow && storedDots[i].column == middleColumn) {
+  for (let i = 0; i < filteredDots.length; i++) { //if current dot has lowest row value and lowest column value it gets returned
+    if (filteredDots[i].row == middleRow && filteredDots[i].column == middleColumn) {
       return storedDots[storedDots.indexOf(storedDots[i])]
     }
   }
@@ -227,7 +225,7 @@ const onMouseMove = (e) =>{
 // let upperModulusCounter = -9
 // let lowerModulusCounter = -8
 
-    // middleDot.isAlive = true
+    middleDot.isAlive = true
     //sometimes the farthest dot num skips the number it should modulus againts? theyby skipping the regen
     //seems to happen at a fixed height/depth though
 
@@ -305,12 +303,12 @@ renderer.domElement.onwheel = zoom;
 
 
 class DOT {
-  constructor(row, column, isAlive, mesh, outline) {
+  constructor(row, column, isAlive, mesh, onScreen) {
     this.row = row
     this.column = column
     this.isAlive = isAlive
     this.mesh = mesh
-    this.outline = outline
+    this.onScreen = onScreen
   }
 
   getLivingNeighbors() {
@@ -324,8 +322,6 @@ class DOT {
 
 
 
-let previousStart
-let newDotArray
 const renderByRowColumn = (direction) => {
   if (storedDots[0] == undefined) { //if this array is undefined then no dots have been rendered, and this function will render a w x h grid of dots
     for (let w = 0; w < gridWidth; w++) {
@@ -353,13 +349,12 @@ const renderByRowColumn = (direction) => {
         // scene.add(planeOutline)
 
         
-        let newDot = new DOT(w, h, false, plane)
+        let newDot = new DOT(w, h, false, plane, true)
         newDot.x = w
         newDot.y = h
         storedDots.push(newDot)
         // console.log(newDot)
         
-        previousStart = storedDots[0].mesh.position
 
         oldFarthestRightDot = farthestRightDot
         oldFarthestLeftDot = farthestLeftDot
@@ -375,6 +370,11 @@ const renderByRowColumn = (direction) => {
     let leftEdgePieces = []
     let topEdgePieces = []
     let bottomEdgePieces = []
+    let filteredDots = storedDots.filter(function(item){ 
+      if (item.onScreen == true) {
+        return item
+      } 
+     })
     
     //instead of that \/ if statment, to a math.max of the relative ditances with x,-x,y,-y from the start and the largest value is the if we go into
 
@@ -391,32 +391,26 @@ const renderByRowColumn = (direction) => {
     }
     // console.log(storedDots[0].mesh.position.x) //when this equals 7 it regenerates the left column?
     if (direction == "left") { //a box scrolled offscreen to the left //except not and this line needs to be fixed to better determine that
-      // previousStart = storedDots[0].mesh.position.x
-      previousStart = storedDots[0].mesh.position
 
-      rightEdge = Math.max(...storedDots.map(o => o.row))
-      leftEdge = Math.min(...storedDots.map(o => o.row))
-      console.log(leftEdge)
+      rightEdge = Math.max(...filteredDots.map(o => o.row))
+      leftEdge = Math.min(...filteredDots.map(o => o.row))
 
 
       toBeSpliced = []
       rightEdgePieces = []
       leftEdgePieces = []
       
-      console.log(storedDots.length)
 
       for (let j = 0; j < storedDots.length; j++) {
-        if (storedDots[j].row == rightEdge) {
+        if (storedDots[j].row == rightEdge && storedDots[j].onScreen == true) {
           rightEdgePieces.push(storedDots[j])
         }
-        // console.log(storedDots[j].column)
       }
       for (let j = 0; j < storedDots.length; j++) {
-        if (storedDots[j].row == leftEdge) {
+        if (storedDots[j].row == leftEdge && storedDots[j].onScreen == true) {
           leftEdgePieces.push(storedDots[j])
           toBeSpliced.push(j)
         }
-        // console.log(storedDots[j].column)
       }
 
 
@@ -431,50 +425,45 @@ const renderByRowColumn = (direction) => {
         let newColumn = rightEdgePieces[r].column
 
 
-        let replacementDot = new DOT(newRow, newColumn, false, newGeometry.plane)
+        let replacementDot = new DOT(newRow, newColumn, false, newGeometry.plane, true)
         storedDots.push(replacementDot)
 
       }
-      console.log(leftEdge)
-      // console.log(storedDots)
       for (let i = storedDots.length - 1; i >= 0; i--) {
-        // console.log()
-        if (storedDots[i].row == leftEdge && storedDots[i].isAlive == false) {
-          storedDots[i].mesh.material = undefined
-          storedDots[i].mesh.geometry = undefined
-          scene.remove(storedDots[i].mesh)
-          storedDots.splice(i, 1)
+        if (storedDots[i].row == leftEdge) {
+          storedDots[i].onScreen = false
+          if (storedDots[i].isAlive == false) {
+            storedDots[i].mesh.material = undefined
+            storedDots[i].mesh.geometry = undefined
+            scene.remove(storedDots[i].mesh)
+            storedDots.splice(i, 1)
+          }
+
         }
       }
       toBeSpliced = []
 
 
-      // farthestRightDot.mesh.position.x > 0 && 
     } else if (direction == "right") { //a box scrolled offscreen to the right
-      // previousStart = storedDots[0].mesh.position.x
       
-      previousStart = storedDots[0].mesh.position
 
-      rightEdge = Math.max(...storedDots.map(o => o.row))
-      leftEdge = Math.min(...storedDots.map(o => o.row))
-      // console.log(rightEdge)
+      rightEdge = Math.max(...filteredDots.map(o => o.row))
+      leftEdge = Math.min(...filteredDots.map(o => o.row))
 
 
-      newDotArray = storedDots
       toBeSpliced = []
       rightEdgePieces = []
       leftEdgePieces = []
       
-      // console.log(storedDots.length)
 
       for (let j = 0; j < storedDots.length; j++) {
-        if (storedDots[j].row == rightEdge) {
+        if (storedDots[j].row == rightEdge && storedDots[j].onScreen == true) {
           rightEdgePieces.push(storedDots[j])
           toBeSpliced.push(j)
         }
       }
       for (let j = 0; j < storedDots.length; j++) {
-        if (storedDots[j].row == leftEdge) {
+        if (storedDots[j].row == leftEdge && storedDots[j].onScreen == true) {
           leftEdgePieces.push(storedDots[j])
         }
       }
@@ -491,45 +480,45 @@ const renderByRowColumn = (direction) => {
         let newColumn = leftEdgePieces[r].column
 
 
-        let replacementDot = new DOT(newRow, newColumn, false, newGeometry.plane)
+        let replacementDot = new DOT(newRow, newColumn, false, newGeometry.plane, true)
         storedDots.push(replacementDot)
 
       }
-      // console.log(rightEdge)
-      // console.log(storedDots)
+
       for (let i = storedDots.length - 1; i >= 0; i--) {
         // console.log()
-        if (storedDots[i].row == rightEdge && storedDots[i].isAlive == false) {
-          storedDots[i].mesh.material = undefined
-          storedDots[i].mesh.geometry = undefined
-          scene.remove(storedDots[i].mesh)
-          storedDots.splice(i, 1)
+        if (storedDots[i].row == rightEdge) {
+          storedDots[i].onScreen = false
+          if (storedDots[i].isAlive == false) {
+            storedDots[i].mesh.material = undefined
+            storedDots[i].mesh.geometry = undefined
+            scene.remove(storedDots[i].mesh)
+            storedDots.splice(i, 1)
+          }
+
         }
       }
       toBeSpliced = []
-     //do deletion of right edge and generation of an edge to the left
 
     } else if (direction == "up") { //a box scrolled offscreen to the bottom
 
-      topEdge = Math.max(...storedDots.map(o => o.column))
-      bottomEdge = Math.min(...storedDots.map(o => o.column))
-      // console.log(rightEdge)
+      topEdge = Math.max(...filteredDots.map(o => o.column))
+      bottomEdge = Math.min(...filteredDots.map(o => o.column))
 
 
       toBeSpliced = []
       topEdgePieces = []
       bottomEdgePieces = []
       
-      // console.log(storedDots.length)
 
       for (let j = 0; j < storedDots.length; j++) {
-        if (storedDots[j].column == topEdge) {
+        if (storedDots[j].column == topEdge && storedDots[j].onScreen == true) {
           topEdgePieces.push(storedDots[j])
           toBeSpliced.push(j)
         }
       }
       for (let j = 0; j < storedDots.length; j++) {
-        if (storedDots[j].column == bottomEdge) {
+        if (storedDots[j].column == bottomEdge && storedDots[j].onScreen == true) {
           bottomEdgePieces.push(storedDots[j])
         }
       }
@@ -546,7 +535,7 @@ const renderByRowColumn = (direction) => {
         let newColumn = topEdgePieces[r].column + 1
 
 
-        let replacementDot = new DOT(newRow, newColumn, false, newGeometry.plane)
+        let replacementDot = new DOT(newRow, newColumn, false, newGeometry.plane, true)
         storedDots.push(replacementDot)
 
       }
@@ -554,18 +543,22 @@ const renderByRowColumn = (direction) => {
       // console.log(storedDots)
       for (let i = storedDots.length - 1; i >= 0; i--) {
         // console.log()
-        if (storedDots[i].column == bottomEdge && storedDots[i].isAlive == false) {
-          storedDots[i].mesh.material = undefined
-          storedDots[i].mesh.geometry = undefined
-          scene.remove(storedDots[i].mesh)
-          storedDots.splice(i, 1)
+        if (storedDots[i].column == bottomEdge) {
+          storedDots[i].onScreen = false
+          if (storedDots[i].isAlive == false) {
+            storedDots[i].mesh.material = undefined
+            storedDots[i].mesh.geometry = undefined
+            scene.remove(storedDots[i].mesh)
+            storedDots.splice(i, 1)
+          }
+
         }
       }
       toBeSpliced = []
 
     } else if (direction == "down") { //a box scrolled offscreen to the top
-      topEdge = Math.max(...storedDots.map(o => o.column))
-      bottomEdge = Math.min(...storedDots.map(o => o.column))
+      topEdge = Math.max(...filteredDots.map(o => o.column))
+      bottomEdge = Math.min(...filteredDots.map(o => o.column))
       // console.log(rightEdge)
 
       toBeSpliced = []
@@ -575,13 +568,13 @@ const renderByRowColumn = (direction) => {
       // console.log(storedDots.length)
 
       for (let j = 0; j < storedDots.length; j++) {
-        if (storedDots[j].column == topEdge) {
+        if (storedDots[j].column == topEdge && storedDots[j].onScreen == true) {
           topEdgePieces.push(storedDots[j])
           toBeSpliced.push(j)
         }
       }
       for (let j = 0; j < storedDots.length; j++) {
-        if (storedDots[j].column == bottomEdge) {
+        if (storedDots[j].column == bottomEdge && storedDots[j].onScreen == true) {
           bottomEdgePieces.push(storedDots[j])
         }
       }
@@ -598,7 +591,7 @@ const renderByRowColumn = (direction) => {
         let newColumn = bottomEdgePieces[r].column - 1
 
 
-        let replacementDot = new DOT(newRow, newColumn, false, newGeometry.plane)
+        let replacementDot = new DOT(newRow, newColumn, false, newGeometry.plane, true)
         storedDots.push(replacementDot)
 
       }
@@ -606,11 +599,15 @@ const renderByRowColumn = (direction) => {
       // console.log(storedDots)
       for (let i = storedDots.length - 1; i >= 0; i--) {
         // console.log()
-        if (storedDots[i].column == topEdge && storedDots[i].isAlive == false) {
-          storedDots[i].mesh.material = undefined
-          storedDots[i].mesh.geometry = undefined
-          scene.remove(storedDots[i].mesh)
-          storedDots.splice(i, 1)
+        if (storedDots[i].column == topEdge) {
+          storedDots[i].onScreen = false
+          if (storedDots[i].isAlive == false) {
+            storedDots[i].mesh.material = undefined
+            storedDots[i].mesh.geometry = undefined
+            scene.remove(storedDots[i].mesh)
+            storedDots.splice(i, 1)
+          }
+
         }
       }
       toBeSpliced = []
