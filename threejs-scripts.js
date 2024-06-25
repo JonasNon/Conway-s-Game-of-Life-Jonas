@@ -9,10 +9,11 @@ let white = 0xFFFFFF
 
 let zoomAdjuster = 100 //bigger number = more zoomed in
 let storedDots = []
+let offScreenDots = []
 let panSpeed = 50 //lower number = faster panning
 let zoomSpeed = .0001; //
-let gridWidth = screen.width/45  // starting grid size
-let gridHeight = screen.height/45
+let gridWidth = screen.width/30  // starting grid size 45==good base zoom size
+let gridHeight = screen.height/30
 let gridArea = gridHeight*gridWidth
 let fadeDistanceX = screen.availWidth/90
 let fadeDistanceY = screen.availHeight/90
@@ -114,14 +115,7 @@ const findMiddle = () => {
 
   //close, but it doesn't count visible living dots right now
 
-
-  var filteredItems = storedDots.filter(function(item){ 
-    if (item.isAlive == false) {
-      return item
-    } else {
-      console.log("found life")
-    }
-   })
+  //store living dots in seperate array? and only pushes them to that array when they would be deleted?
 
 
   // let middleRow = Math.min(...filteredItems.map(o => o.row)) + Math.trunc(((Math.max(...filteredItems.map(o => o.row)) - Math.min(...filteredItems.map(o => o.row)))/2))
@@ -197,6 +191,7 @@ const onMouseMove = (e) =>{
 
     // renderVisibleDots()
 
+    
     // renderByRowColumn()
     // console.log(storedDots[0].mesh.position.x)
     // console.log(Math.abs(Math.trunc(storedDots[0].mesh.position.x)) % moudulusCounter)
@@ -219,15 +214,15 @@ const onMouseMove = (e) =>{
 
     // console.log("Up",farthestUpDot.mesh.position.y)
 
-    console.log("x:",middleDot.mesh.position.x)
-    console.log("y:",middleDot.mesh.position.y)
+    // console.log("x:",middleDot.mesh.position.x)
+    // console.log("y:",middleDot.mesh.position.y)
 
 // let leftModulusCounter = -15.6
 // let rightMoudulusCounter = -15
 // let upperModulusCounter = -9
 // let lowerModulusCounter = -8
 
-    // middleDot.isAlive = true
+    middleDot.isAlive = true
     //sometimes the farthest dot num skips the number it should modulus againts? theyby skipping the regen
     //seems to happen at a fixed height/depth though
 
@@ -391,8 +386,6 @@ const renderByRowColumn = (direction) => {
     }
     // console.log(storedDots[0].mesh.position.x) //when this equals 7 it regenerates the left column?
     if (direction == "left") { //a box scrolled offscreen to the left //except not and this line needs to be fixed to better determine that
-      // previousStart = storedDots[0].mesh.position.x
-      previousStart = storedDots[0].mesh.position
 
       rightEdge = Math.max(...storedDots.map(o => o.row))
       leftEdge = Math.min(...storedDots.map(o => o.row))
@@ -420,26 +413,55 @@ const renderByRowColumn = (direction) => {
       }
 
 
+
+      //generate a new line
       for (let r = 0; r < rightEdgePieces.length; r++) {
-
-        let newX = rightEdgePieces[r].mesh.position.x + 1
-        let newY = rightEdgePieces[r].mesh.position.y
-
-        let newGeometry = generatePlanes(newX, newY)
 
         let newRow = rightEdgePieces[r].row + 1
         let newColumn = rightEdgePieces[r].column
 
 
+
+        let newX = rightEdgePieces[r].mesh.position.x + 1
+        let newY = rightEdgePieces[r].mesh.position.y
+
+
+
+        let newGeometry = generatePlanes(newX, newY)
+
+
+
+
         let replacementDot = new DOT(newRow, newColumn, false, newGeometry.plane)
+
+        for (let d = 0; d < offScreenDots.length; d++) {
+          if (offScreenDots[d].row == newRow && offScreenDots[d].column == newColumn) {
+            replacementDot.isAlive = true
+            replacementDot.mesh.material.color.setHex(lime)
+
+          }
+        }
+
+
         storedDots.push(replacementDot)
 
       }
-      console.log(leftEdge)
-      // console.log(storedDots)
+
       for (let i = storedDots.length - 1; i >= 0; i--) {
-        // console.log()
-        if (storedDots[i].row == leftEdge && storedDots[i].isAlive == false) {
+        if (storedDots[i].row == leftEdge) {
+          if (storedDots[i].isAlive == true) {
+            let alreadyExists = false
+            for (let d = 0; d < offScreenDots.length; d++) {
+              if (offScreenDots[d].row == storedDots[i].row && offScreenDots[d].column == storedDots[i].column) {
+                alreadyExists = true
+              }
+            }
+            if (!alreadyExists) {
+              offScreenDots.push(storedDots[i])
+              console.log("one added:", offScreenDots)
+
+            }
+          }
           storedDots[i].mesh.material = undefined
           storedDots[i].mesh.geometry = undefined
           scene.remove(storedDots[i].mesh)
@@ -451,22 +473,16 @@ const renderByRowColumn = (direction) => {
 
       // farthestRightDot.mesh.position.x > 0 && 
     } else if (direction == "right") { //a box scrolled offscreen to the right
-      // previousStart = storedDots[0].mesh.position.x
-      
-      previousStart = storedDots[0].mesh.position
+
 
       rightEdge = Math.max(...storedDots.map(o => o.row))
       leftEdge = Math.min(...storedDots.map(o => o.row))
-      // console.log(rightEdge)
-
 
       newDotArray = storedDots
       toBeSpliced = []
       rightEdgePieces = []
       leftEdgePieces = []
       
-      // console.log(storedDots.length)
-
       for (let j = 0; j < storedDots.length; j++) {
         if (storedDots[j].row == rightEdge) {
           rightEdgePieces.push(storedDots[j])
@@ -479,27 +495,41 @@ const renderByRowColumn = (direction) => {
         }
       }
 
+      
+
 
       for (let r = 0; r < leftEdgePieces.length; r++) {
+
+        let newRow = leftEdgePieces[r].row - 1
+        let newColumn = leftEdgePieces[r].column
 
         let newX = leftEdgePieces[r].mesh.position.x - 1
         let newY = leftEdgePieces[r].mesh.position.y
 
         let newGeometry = generatePlanes(newX, newY)
 
-        let newRow = leftEdgePieces[r].row - 1
-        let newColumn = leftEdgePieces[r].column
+
 
 
         let replacementDot = new DOT(newRow, newColumn, false, newGeometry.plane)
+        for (let d = 0; d < offScreenDots.length; d++) {
+          if (offScreenDots[d].row == newRow && offScreenDots[d].column == newColumn) {
+            replacementDot.isAlive = true
+            replacementDot.mesh.material.color.setHex(lime)
+
+          }
+        }
         storedDots.push(replacementDot)
 
       }
       // console.log(rightEdge)
       // console.log(storedDots)
       for (let i = storedDots.length - 1; i >= 0; i--) {
-        // console.log()
-        if (storedDots[i].row == rightEdge && storedDots[i].isAlive == false) {
+        if (storedDots[i].row == rightEdge) {
+          if (storedDots[i].isAlive == true) {
+            offScreenDots.push(storedDots[i])
+            console.log("one added:", offScreenDots)
+          }
           storedDots[i].mesh.material = undefined
           storedDots[i].mesh.geometry = undefined
           scene.remove(storedDots[i].mesh)
@@ -536,25 +566,35 @@ const renderByRowColumn = (direction) => {
 
 
       for (let r = 0; r < topEdgePieces.length; r++) {
+        let newRow = topEdgePieces[r].row 
+        let newColumn = topEdgePieces[r].column + 1
 
         let newX = topEdgePieces[r].mesh.position.x 
         let newY = topEdgePieces[r].mesh.position.y + 1
 
         let newGeometry = generatePlanes(newX, newY)
 
-        let newRow = topEdgePieces[r].row 
-        let newColumn = topEdgePieces[r].column + 1
+
 
 
         let replacementDot = new DOT(newRow, newColumn, false, newGeometry.plane)
+        for (let d = 0; d < offScreenDots.length; d++) {
+          if (offScreenDots[d].row == newRow && offScreenDots[d].column == newColumn) {
+            replacementDot.isAlive = true
+            replacementDot.mesh.material.color.setHex(lime)
+
+          }
+        }
         storedDots.push(replacementDot)
 
       }
-      // console.log(rightEdge)
-      // console.log(storedDots)
+
       for (let i = storedDots.length - 1; i >= 0; i--) {
-        // console.log()
-        if (storedDots[i].column == bottomEdge && storedDots[i].isAlive == false) {
+        if (storedDots[i].column == bottomEdge) {
+          if (storedDots[i].isAlive == true) {
+            offScreenDots.push(storedDots[i])
+            console.log("one added:", offScreenDots)
+          }
           storedDots[i].mesh.material = undefined
           storedDots[i].mesh.geometry = undefined
           scene.remove(storedDots[i].mesh)
@@ -588,25 +628,34 @@ const renderByRowColumn = (direction) => {
 
 
       for (let r = 0; r < topEdgePieces.length; r++) {
+        let newRow = bottomEdgePieces[r].row
+        let newColumn = bottomEdgePieces[r].column - 1
 
         let newX = bottomEdgePieces[r].mesh.position.x 
         let newY = bottomEdgePieces[r].mesh.position.y - 1
 
         let newGeometry = generatePlanes(newX, newY)
 
-        let newRow = bottomEdgePieces[r].row
-        let newColumn = bottomEdgePieces[r].column - 1
 
 
         let replacementDot = new DOT(newRow, newColumn, false, newGeometry.plane)
+        for (let d = 0; d < offScreenDots.length; d++) {
+          if (offScreenDots[d].row == newRow && offScreenDots[d].column == newColumn) {
+            replacementDot.isAlive = true
+            replacementDot.mesh.material.color.setHex(lime)
+
+          }
+        }
         storedDots.push(replacementDot)
 
       }
-      // console.log(rightEdge)
-      // console.log(storedDots)
+
       for (let i = storedDots.length - 1; i >= 0; i--) {
-        // console.log()
-        if (storedDots[i].column == topEdge && storedDots[i].isAlive == false) {
+        if (storedDots[i].column == topEdge) {
+          if (storedDots[i].isAlive == true) {
+            offScreenDots.push(storedDots[i])
+            console.log("one added:", offScreenDots)
+          }
           storedDots[i].mesh.material = undefined
           storedDots[i].mesh.geometry = undefined
           scene.remove(storedDots[i].mesh)
