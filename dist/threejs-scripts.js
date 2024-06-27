@@ -329,7 +329,7 @@ const renderByRowColumn = (direction) => {
         
 
       
-        let newMesh = new THREE.PlaneGeometry( 0.9, 0.9 )
+        let newMesh = new THREE.PlaneGeometry( 1, 1 )
         let newMaterial = new THREE.MeshBasicMaterial( {color: white, side: THREE.DoubleSide} )
         const plane = new THREE.Mesh(newMesh, newMaterial);
         plane.position.x = w - gridWidth/2
@@ -682,7 +682,7 @@ renderByRowColumn()
 
 
 const generatePlanes = (xPos, yPos) => {
-  let newMesh = new THREE.PlaneGeometry( 0.9, 0.9 )
+  let newMesh = new THREE.PlaneGeometry( 1, 1 )
   let newMaterial = new THREE.MeshBasicMaterial( {color: white, side: THREE.DoubleSide} )
   const plane = new THREE.Mesh(newMesh, newMaterial);
   plane.position.x = xPos
